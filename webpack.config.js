@@ -4,7 +4,6 @@ var path = require('path');
 module.exports = {
   entry: {
     main: './main.js',
-    book: './book.js'
   },
   devtool: 'source-map',
   target: 'node',

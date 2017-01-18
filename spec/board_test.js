@@ -8,10 +8,13 @@ import {
   getRegionsByNeighbor,
   placeArmies,
   attack,
-  calcDistanceFrom,
   OWNER,
   PHASE,
 } from '../Board';
+
+import {
+  calcDistanceFrom,
+} from '../Analysis';
 
 let testState = imm.fromJS({
   playerId: 1,
@@ -94,6 +97,11 @@ describe('Search Functions', () => {
     expect(depths['2']).to.equal(2);
     expect(depths['3']).to.equal(1);
     expect(depths['4']).to.equal(0);
+  });
+
+  it ("Gets the distance for a single region", () => {
+    let depth = calcDistanceFrom(testState, 2, 4);
+    expect(depth).to.equal(2);
   });
 });
 
