@@ -1,4 +1,5 @@
 import imm from 'immutable';
+import * as Analysis from './Analysis';
 
 export const OWNER = {
   NONE: 0,
@@ -141,7 +142,6 @@ export default class WarlightState extends imm.Record(initialState) {
 WarlightState.OWNER = OWNER;
 WarlightState.PHASE = PHASE;
 
-import * as Analysis from './Analysis';
 
 for (let i in Analysis) {
   WarlightState.prototype[i] = function () {

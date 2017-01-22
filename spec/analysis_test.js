@@ -7,12 +7,12 @@ import {
   REGION_TYPE,
   getSurroundingPower,
   scoreState,
-} from '../Analysis';
+} from '../src/Analysis';
 
 import WarlightState, {
   OWNER,
   PHASE,
-} from '../state';
+} from '../src/state';
 
 let testState = new WarlightState(imm.fromJS({
   playerId: 1,
@@ -94,6 +94,5 @@ describe('Distance Functions', () => {
 describe('Scoring Functions', () => {
   it ("Score State", () => {
     let score = scoreState(testState);
-    console.log(score);
   });
 });

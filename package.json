@@ -4,9 +4,7 @@
   "description": "Ultimate tic tac toe bot",
   "main": "build/main.js",
   "scripts": {
-    "test": "mocha --compilers js:babel-core/register spec/*.js",
-    "test_interface": "cat test.sh | node ./build/main.js",
-    "benchmark": "BENCHMARK=TRUE node ./build/test.js"
+    "test": "mocha --compilers js:babel-core/register spec/*.js"
   },
   "author": "Alexander Rowe <alexrowe707@gmail.com> (http://alexrowe.net)",
   "license": "MIT",

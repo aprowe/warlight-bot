@@ -76,6 +76,9 @@ export function calcDistanceFrom (state, targetId, regionId) {
   }
 }
 
+/**
+ * Region Heuristics
+ */
 export function getRegionType (state, regionId) {
   let distFromEnemy = calcDistanceFrom(state, state.opponentId(), regionId);
   if (distFromEnemy <= 1) {
@@ -103,16 +106,9 @@ export function getSurroundingPower (state, regionId) {
   return power;
 }
 
-export function diffRegionScore(state, regionId) {
-  let plusOne  = state.updateIn(['regions', regionId, 'armies'], n => n++);
-  let minusOne = state.updateIn(['regions', regionId, 'armies'], n => n--);
-
-  return {
-    plus: scoreState(plusOne),
-    minus: scoreState(minusOne),
-  };
-}
-
+/***********************************
+ * Scoring Functions and Constants
+ ***********************************/
 const TYPE_MULTIPLIER = {
   [REGION_TYPE.WARZONE]:   2,
   [REGION_TYPE.HOMELAND]: -1,
@@ -138,4 +134,14 @@ export function scoreState (state) {
   });
 
   return score;
+}
+
+export function diffRegionScore(state, regionId) {
+  let plusOne  = state.updateIn(['regions', regionId, 'armies'], n => n++);
+  let minusOne = state.updateIn(['regions', regionId, 'armies'], n => n--);
+
+  return {
+    plus: scoreState(plusOne),
+    minus: scoreState(minusOne),
+  };
 }

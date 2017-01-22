@@ -1,7 +1,7 @@
 import WarlightState, {
   OWNER,
   PHASE,
-} from '../state';
+} from '../src/state';
 
 import imm from 'immutable';
 
