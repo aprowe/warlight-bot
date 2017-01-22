@@ -1,10 +1,6 @@
 import {
-  getOwner,
-  opponentId,
   OWNER,
-} from './Board';
-
-import * as Board from './Board';
+} from './state';
 
 export const REGION_TYPE = {
   // Tucked away, only friendly neighbors
@@ -17,16 +13,12 @@ export const REGION_TYPE = {
   WARZONE: 3,
 };
 
-DEFINE_MACRO(STATE, (str) => {
-  return state.getIn(str.split('.'));
-});
-
 /**
  * Uses a breadth-first search to determne a nodes distance from
  * the enemy (or unknown)
  */
 export function calcDistanceFrom (state, targetId, regionId) {
-  let nodes
+  let nodes;
 
   // if region is specified, just search that region
   if (regionId) {
@@ -47,7 +39,7 @@ export function calcDistanceFrom (state, targetId, regionId) {
     let depth = 1;
 
     // If it is an opponent, set distance to 0
-    let owner = getOwner(state, n);
+    let owner = state.getOwner(n);
     if (owner === targetId) {
       dist[n] = 0;
       continue;
@@ -60,7 +52,7 @@ export function calcDistanceFrom (state, targetId, regionId) {
         continue;
       }
 
-      let owner = getOwner(state, regionId);
+      let owner = state.getOwner(regionId);
 
       if (owner == targetId) {
         dist[n] = depth;
@@ -85,7 +77,7 @@ export function calcDistanceFrom (state, targetId, regionId) {
 }
 
 export function getRegionType (state, regionId) {
-  let distFromEnemy = calcDistanceFrom(state, opponentId(state), regionId);
+  let distFromEnemy = calcDistanceFrom(state, state.opponentId(), regionId);
   if (distFromEnemy <= 1) {
     return REGION_TYPE.WARZONE;
   }
@@ -111,25 +103,38 @@ export function getSurroundingPower (state, regionId) {
   return power;
 }
 
+export function diffRegionScore(state, regionId) {
+  let plusOne  = state.updateIn(['regions', regionId, 'armies'], n => n++);
+  let minusOne = state.updateIn(['regions', regionId, 'armies'], n => n--);
+
+  return {
+    plus: scoreState(plusOne),
+    minus: scoreState(minusOne),
+  };
+}
+
 const TYPE_MULTIPLIER = {
   [REGION_TYPE.WARZONE]:   2,
   [REGION_TYPE.HOMELAND]: -1,
   [REGION_TYPE.FRONTIER]:  1,
 };
 
+const REGION_SCORE = 10;
+
 export function scoreRegion (state, regionId) {
   let type = getRegionType(state, regionId);
 
-  return TYPE_MULTIPLIER[type] * STATE(`regions.${regionId}.armies`);
+  return TYPE_MULTIPLIER[type] * state.getArmies(regionId);
 }
 
 export function scoreState (state) {
   let score = 0;
   let player = state.get('activeId');
 
-  let regions = Board.getRegionsByOwner(state, player);
+  let regions = state.getRegionsByOwner(player);
   regions.forEach((r, id) => {
     score += scoreRegion(state, id);
+    score += 10;
   });
 
   return score;

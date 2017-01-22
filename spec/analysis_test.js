@@ -2,17 +2,6 @@ import imm from 'immutable';
 import { expect } from 'chai';
 
 import {
-  initialState,
-  getRegionsByOwner,
-  getRegionsBySuper,
-  getRegionsByNeighbor,
-  placeArmies,
-  attack,
-  OWNER,
-  PHASE,
-} from '../Board';
-
-import {
   calcDistanceFrom,
   getRegionType,
   REGION_TYPE,
@@ -20,7 +9,12 @@ import {
   scoreState,
 } from '../Analysis';
 
-let testState = imm.fromJS({
+import WarlightState, {
+  OWNER,
+  PHASE,
+} from '../state';
+
+let testState = new WarlightState(imm.fromJS({
   playerId: 1,
   opponentId: 2,
   activeId: 1,
@@ -57,7 +51,7 @@ let testState = imm.fromJS({
   armiesToPlace: 3,
   selectableRegions: [1,3,4],
   phase: PHASE.PLACE_ARMIES,
-});
+}));
 
 describe('Analysis Functions', () => {
   it ("Gets the region type", () => {
@@ -68,6 +62,32 @@ describe('Analysis Functions', () => {
   it ("Gets the surrounding power", () => {
     let power = getSurroundingPower(testState, 1);
     expect(power).to.equal(12);
+  });
+});
+
+describe('Distance Functions', () => {
+  it ("Gets the distance from owners", () => {
+    let depths = calcDistanceFrom(testState, 2);
+
+    expect(depths['1']).to.equal(0);
+    expect(depths['2']).to.equal(1);
+    expect(depths['3']).to.equal(1);
+    expect(depths['4']).to.equal(2);
+
+    depths = calcDistanceFrom(testState, 1);
+
+    expect(depths['1']).to.equal(2);
+    expect(depths['2']).to.equal(2);
+    expect(depths['3']).to.equal(1);
+    expect(depths['4']).to.equal(0);
+  });
+
+  it ("Gets the distance for a single region", () => {
+    let depth = calcDistanceFrom(testState, 2, 4);
+    expect(depth).to.equal(2);
+
+    depth = testState.calcDistanceFrom(2, 4);
+    expect(depth).to.equal(2);
   });
 });
 
