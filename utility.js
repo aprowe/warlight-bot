@@ -1,5 +1,9 @@
 import imm from 'immutable';
 
+DEFINE_MACRO(STATE, (str) => {
+  return state.getIn(str.split('.'));
+});
+
 export function getDiagonals (m) {
   return [
     [m[0][0], m[1][1], m[2][2]],

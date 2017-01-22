@@ -1,4 +1,5 @@
 import Interface from './Interface';
+import Analysis from './Analysis';
 
 /**
  * Initialize bot

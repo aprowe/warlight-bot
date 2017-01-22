@@ -17,6 +17,7 @@ import {
   getRegionType,
   REGION_TYPE,
   getSurroundingPower,
+  scoreState,
 } from '../Analysis';
 
 let testState = imm.fromJS({
@@ -67,5 +68,12 @@ describe('Analysis Functions', () => {
   it ("Gets the surrounding power", () => {
     let power = getSurroundingPower(testState, 1);
     expect(power).to.equal(12);
+  });
+});
+
+describe('Scoring Functions', () => {
+  it ("Score State", () => {
+    let score = scoreState(testState);
+    console.log(score);
   });
 });

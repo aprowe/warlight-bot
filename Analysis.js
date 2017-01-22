@@ -4,6 +4,8 @@ import {
   OWNER,
 } from './Board';
 
+import * as Board from './Board';
+
 export const REGION_TYPE = {
   // Tucked away, only friendly neighbors
   HOMELAND: 1,
@@ -14,6 +16,10 @@ export const REGION_TYPE = {
   // One or More Hostile neighbors
   WARZONE: 3,
 };
+
+DEFINE_MACRO(STATE, (str) => {
+  return state.getIn(str.split('.'));
+});
 
 /**
  * Uses a breadth-first search to determne a nodes distance from
@@ -103,4 +109,28 @@ export function getSurroundingPower (state, regionId) {
   }
 
   return power;
+}
+
+const TYPE_MULTIPLIER = {
+  [REGION_TYPE.WARZONE]:   2,
+  [REGION_TYPE.HOMELAND]: -1,
+  [REGION_TYPE.FRONTIER]:  1,
+};
+
+export function scoreRegion (state, regionId) {
+  let type = getRegionType(state, regionId);
+
+  return TYPE_MULTIPLIER[type] * STATE(`regions.${regionId}.armies`);
+}
+
+export function scoreState (state) {
+  let score = 0;
+  let player = state.get('activeId');
+
+  let regions = Board.getRegionsByOwner(state, player);
+  regions.forEach((r, id) => {
+    score += scoreRegion(state, id);
+  });
+
+  return score;
 }
