@@ -7,6 +7,8 @@ import {
   REGION_TYPE,
   getSurroundingPower,
   scoreState,
+  getShortestPath,
+  calcBottleNecks,
 } from '../src/Analysis';
 
 import WarlightState, {
@@ -94,5 +96,65 @@ describe('Distance Functions', () => {
 describe('Scoring Functions', () => {
   it ("Score State", () => {
     let score = scoreState(testState);
+  });
+});
+
+describe('Pathfinding', () => {
+  it ('Finds the shortest path', () => {
+    let path = getShortestPath(testState, 1, 4);
+    expect(path).to.deep.equal([1,3,4])
+  });
+
+  it ('Finds the shortest path for another configuration', () => {
+    let testState2 = new WarlightState(imm.fromJS({
+      regions: {
+        1: {
+          neighbors: [3],
+        },
+        3: {
+          neighbors: [1,5],
+        },
+        5: {
+          neighbors: [3,7],
+        },
+        7: {
+          neighbors: [5],
+        }
+      },
+    }));
+    let path = getShortestPath(testState2, 1, 7);
+    expect(path).to.deep.equal([1,3,5,7])
+  });
+
+  it ('Works if same region', () => {
+    let path = getShortestPath(null, 19, 19);
+    expect(path).to.deep.equal([19]);
+  });
+
+  it ("Calculates BottleNecks", () => {
+    let testState2 = new WarlightState(imm.fromJS({
+      regions: {
+        0: { neighbors: [1,2,3], },
+        1: { neighbors: [0,2,3], },
+        2: { neighbors: [1,2,3], },
+        3: { neighbors: [0,1,2,8], },
+        8: { neighbors: [3,4], },
+        4: { neighbors: [8,5,6,7], },
+        5: { neighbors: [4], },
+        6: { neighbors: [4], },
+        7: { neighbors: [4], },
+      },
+    }));
+    let bottles = calcBottleNecks(testState2);
+    expect(bottles[8] > bottles[3]);
+    expect(bottles[8] > bottles[4]);
+
+    expect(bottles[3] > bottles[2]);
+    expect(bottles[3] > bottles[1]);
+    expect(bottles[3] > bottles[0]);
+
+    expect(bottles[3] > bottles[5]);
+    expect(bottles[3] > bottles[6]);
+    expect(bottles[3] > bottles[7]);
   });
 });

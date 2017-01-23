@@ -2,6 +2,11 @@ import {
   OWNER,
 } from './state';
 
+import {
+  shuffle,
+  sample,
+} from './utility';
+
 export const REGION_TYPE = {
   // Tucked away, only friendly neighbors
   HOMELAND: 1,
@@ -144,4 +149,86 @@ export function diffRegionScore(state, regionId) {
     plus: scoreState(plusOne),
     minus: scoreState(minusOne),
   };
+}
+
+/**
+ * Helper class for getShortestPath
+ */
+function Node (id, parent = null) {
+  this.parent = parent;
+  this.children = [];
+  this.id = id;
+  this.depth = 0;
+}
+
+/**
+ * Returns a random shortes path from one region to another
+ */
+export function getShortestPath(state, region1, region2) {
+  // if same, exit immediately
+  if (region1 == region2) {
+    return [region1];
+  }
+
+  // dictionary for whats counted
+  let counted = {
+    [region1]: true,
+  };
+
+  let queue = [new Node(region1)];
+
+  let targetNode = null;
+  while(targetNode === null && queue.length) {
+    let node = queue.shift();
+
+    shuffle(state.getRegion(node.id).get('neighbors').toJS()).forEach(id => {
+      // If already counted, continue
+      if (counted[id]) {
+        return;
+      }
+
+      counted[id] = true;
+
+      // make new node
+      let newNode = new Node(id, node);
+
+      // Add to queues
+      queue.push(newNode);
+
+      // if its the one, break
+      if (id == region2) {
+        targetNode = newNode;
+      }
+    });
+  }
+
+
+  let path = [];
+  let currentNode = targetNode;
+  while(currentNode) {
+    path.push(currentNode.id);
+    currentNode = currentNode.parent;
+  }
+
+  return path.reverse();
+}
+
+export function calcBottleNecks(state, loops = 10000) {
+  const regionList = Object.keys(state.regions.toJS());
+
+  const scores = {};
+  regionList.forEach((id) => {
+    scores[id] = 0;
+  });
+
+  for(let i = 0; i < loops; i++) {
+    let r1 = sample(regionList);
+    let r2 = sample(regionList);
+    let path = getShortestPath(state, r1, r2)
+    path.forEach(id => {
+      scores[id]++;
+    });
+  }
+
+  return scores;
 }
