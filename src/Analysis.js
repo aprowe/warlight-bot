@@ -230,5 +230,14 @@ export function calcBottleNecks(state, loops = 10000) {
     });
   }
 
+  let smallest = Infinity;
+  for (let i in scores) {
+    smallest = Math.min(smallest, scores[i]);
+  }
+
+  for (let i in scores) {
+    scores[i] /= smallest;
+  }
+
   return scores;
 }

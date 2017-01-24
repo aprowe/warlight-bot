@@ -145,16 +145,14 @@ describe('Pathfinding', () => {
         7: { neighbors: [4], },
       },
     }));
-    let bottles = calcBottleNecks(testState2);
-    expect(bottles[8] > bottles[3]);
-    expect(bottles[8] > bottles[4]);
+    let bottles = testState2.calcBottleNecks();
+    
+    expect(bottles[3] > bottles[2]).to.be.true;
+    expect(bottles[3] > bottles[1]).to.be.true;
+    expect(bottles[3] > bottles[0]).to.be.true;
 
-    expect(bottles[3] > bottles[2]);
-    expect(bottles[3] > bottles[1]);
-    expect(bottles[3] > bottles[0]);
-
-    expect(bottles[3] > bottles[5]);
-    expect(bottles[3] > bottles[6]);
-    expect(bottles[3] > bottles[7]);
+    expect(bottles[4] > bottles[5]).to.be.true;
+    expect(bottles[4] > bottles[6]).to.be.true;
+    expect(bottles[4] > bottles[7]).to.be.true;
   });
 });

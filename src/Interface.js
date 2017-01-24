@@ -13,176 +13,70 @@
 //    limitations under the License.
 
 import readline from 'readline';
-import {
-  updateGameState,
-  initialState,
-  getNextBoards,
-  makeMove,
-  getAvailableMoves,
-} from './Board';
-import {
-  getBestMove,
-  scoreState,
-} from './Bot';
-import {
-  shuffle
-} from './utility';
 
-/**
- * Main class
- * Initializes a map instance and an empty settings object
- */
-var Interface = function () {
+class Interface {
+  constructor() {
+    this.state = null;
+    this.options = {};
+  }
 
-    if (false === (this instanceof Interface)) {
-        return new Interface();
+  run () {
+    let io = readline.createInterface(process.stdin, process.stdout);
+    let bot = this;
+    io.on('line',  data => {
+
+    let line;
+    let lines;
+    let lineParts;
+    let command;
+    let response;
+
+    // stop if line doesn't contain anything
+    if (data.length === 0) {
+        return;
     }
 
-    this.state = initialState();
-    this.options = {};
-    this.depth = 2;
-    this.lastTime = 10000;
-};
+    lines = data.trim().split('\n');
 
-/**
- *
- */
-Interface.prototype.run = function () {
+    while (0 < lines.length) {
+      line = lines.shift().trim();
+      lineParts = line.split(" ")
 
-    var io = readline.createInterface(process.stdin, process.stdout);
+      // stop if lineParts doesn't contain anything
+      if (lineParts.length === 0) {
+          return;
+      }
 
-    var bot = this;
+      // get the input command and convert to camel case
+      command = lineParts.shift().toCamelCase();
 
-    io.on('line', function (data) {
-        var line,
-            lines,
-            lineParts,
-            command,
-            response;
+      // invoke command if function exists and pass the data along
+      // then return response if exists
+      if (!this[command]) {
+        continue;
+      }
 
-        // stop if line doesn't contain anything
-        if (data.length === 0) {
-            return;
-        }
+      response = this[command](lineParts);
 
-        lines = data.trim().split('\n');
-
-        while (0 < lines.length) {
-
-            line = lines.shift().trim();
-            lineParts = line.split(" ")
-
-            // stop if lineParts doesn't contain anything
-            if (lineParts.length === 0) {
-                return;
-            }
-
-            // get the input command and convert to camel case
-            command = lineParts.shift().toCamelCase();
-
-            // invoke command if function exists and pass the data along
-            // then return response if exists
-            if (command in bot) {
-                response = bot[command](lineParts);
-
-                if (response && 0 < response.length) {
-                    process.stdout.write(response + '\n');
-                }
-            } else {
-                process.stderr.write('Unable to execute command: ' + command + ', with data: ' + lineParts + '\n');
-            }
-        }
-    });
-
-    io.on('close', function () {
-        process.exit(0);
-    });
-};
-
-/**
- * Respond to settings command
- * @param Array data
- */
-Interface.prototype.settings = function (data) {
-    var key = data[0],
-        value = data[1];
+      if (response && 0 < response.length) {
+        process.stdout.write(response + '\n');
+      }
+    }
+  }
+  
+  /*
+  * Respond to settings command
+  * @param Array data
+  */
+  settings(data) {
+    let key = data[0],
+    let value = data[1];
 
     // set key to value
     this.options[key] = value;
     this.state = updateGameState(this.state, key, value);
-};
-
-const timeTiers = [
-  // [10000, 6],
-  [5000, 5],
-  [1500, 4],
-  // [450, 4],
-];
-
-export const determineDepth = function (timebank, state) {
-  if (state.get('allActive')) {
-    return 3;
-  }
-
-  for (let i in timeTiers) {
-    if (timeTiers[i][0] <= timebank)  {
-      return timeTiers[i][1];
-    }
-  }
-
-  return 3;
+  };
 }
 
-Interface.prototype.action = function (data) {
-    if (data[0] === 'move') {
-      this.state = this.state.set('activeId', this.state.get('playerId'));
-
-      let timeout = Number(data[1]);
-      let depth = determineDepth(timeout, this.state);
-
-      process.stderr.write('depth: ' + depth + '\n');
-
-      let move;
-      if (this.move == 1) {
-        // if we have the first move, put it here to not waste time
-        move = {x: 4, y: 4};
-
-        // use some time to memoize
-        // getBestMove(this.state, 2);
-      } else {
-        // get best move
-        move = getBestMove(this.state, depth, timeout);
-      }
-
-      // Last chance to catch an error;
-      if (!move) {
-        process.stderr.write('Panic choice!\n');
-        move = shuffle(getAvailableMoves(this.state))[0];
-      }
-
-      // output move
-      let response = "place_move " + move.x + ' ' + move.y;
-      process.stdout.write(response + '\n');
-
-      // Start pondering
-      // getBestMove(makeMove(this.state, move), 3);
-    }
-};
-
-Interface.prototype.update = function (data) {
-  if (data[0] === 'game') {
-    if (data[1] === 'move') {
-      this.move = Number(data[2]);
-    }
-    this.state = updateGameState(this.state, data[1], data[2]);
-  }
-};
-
-String.prototype.toCamelCase = function () {
-
-    return this.replace('/', '_').replace(/_[a-z]/g, function (match) {
-        return match.toUpperCase().replace('_', '');
-    });
-};
 
 export default Interface;

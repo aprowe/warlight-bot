@@ -23,7 +23,7 @@ const initialState = {
   playerId: 1,
   opponentId: 2,
   activeId: 1,
-  superRegions: imm.Map(),
+  superRegions: imm.List(),
   regions: imm.Map(),
   armiesToPlace: 0,
   selectableRegions: imm.List(),
