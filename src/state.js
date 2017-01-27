@@ -20,8 +20,8 @@ export const QUERY = {
 }
 
 const initialState = {
-  playerId: 1,
-  opponentId: 2,
+  playerId: '',
+  opponentId: '',
   activeId: 1,
   superRegions: imm.List(),
   regions: imm.Map(),
@@ -63,10 +63,6 @@ export default class WarlightState extends imm.Record(initialState) {
     return this.get('regions').filter(region => {
       return (region.get('super') == id);
     });
-  }
-
-  opponentId() {
-    return 3 - this.get('playerId');
   }
 
   placeArmies(regionId, count = 1) {

@@ -13,69 +13,93 @@
 //    limitations under the License.
 
 import readline from 'readline';
+import * as Parser from './parser';
+import WarlightState from './state';
 
 class Interface {
   constructor() {
-    this.state = null;
-    this.options = {};
+    this.state = new WarlightState;
+    this.settings = {};
   }
 
   run () {
     let io = readline.createInterface(process.stdin, process.stdout);
     let bot = this;
-    io.on('line',  data => {
+    io.on('line', (data) => {
+      let response = this.handleLines(data);
+      if (response) {
+        process.stdout.write(response);
+      }
+    });
+  }
 
-    let line;
-    let lines;
-    let lineParts;
-    let command;
-    let response;
-
+  handleLines(data) {
     // stop if line doesn't contain anything
     if (data.length === 0) {
         return;
     }
 
-    lines = data.trim().split('\n');
+    let responses = [];
+
+    let lines = data.trim().split('\n');
 
     while (0 < lines.length) {
-      line = lines.shift().trim();
-      lineParts = line.split(" ")
+      let line = lines.shift().trim();
+      let lineParts = line.split(" ")
 
       // stop if lineParts doesn't contain anything
       if (lineParts.length === 0) {
-          return;
+        return;
       }
 
       // get the input command and convert to camel case
-      command = lineParts.shift().toCamelCase();
+      let command = lineParts.shift();
 
       // invoke command if function exists and pass the data along
       // then return response if exists
-      if (!this[command]) {
-        continue;
-      }
-
-      response = this[command](lineParts);
+      let response = this.execute(command, lineParts);
 
       if (response && 0 < response.length) {
-        process.stdout.write(response + '\n');
+        responses.push(response);
       }
     }
-  }
-  
-  /*
-  * Respond to settings command
-  * @param Array data
-  */
-  settings(data) {
-    let key = data[0],
-    let value = data[1];
 
-    // set key to value
-    this.options[key] = value;
-    this.state = updateGameState(this.state, key, value);
-  };
+    return responses.join('\n');
+  }
+
+  /**
+   * Excute based on the
+   */
+  execute(command, args) {
+    switch(command) {
+      case 'setup_map': {
+        this.state = Parser.setup_map(this.state, args.shift(), args.join(' '));
+        return;
+      }
+      case 'settings': {
+        this.settings[args[0]] = args.length <= 2 ? args[1] : args;
+        this.state = Parser.settings(this.state, args.shift(), args.join(' '));
+        return;
+      }
+      case 'update_map': {
+        this.state = Parser.update_map(this.state, args.join(' '));
+        return;
+      }
+      case 'pick_starting_region': {
+        this.state = Parser.pick_starting_region(this.state, args.shift(), args.join(' '));
+        return 'random';
+      }
+      case 'go': {
+        this.state = Parser.go(this.state, args.shift());
+        return 'TODO';
+      }
+      case 'print': {
+
+        return JSON.stringify(this.state.toJS(), null, '\t');
+      }
+
+    }
+  }
 }
 
 

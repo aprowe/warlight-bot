@@ -8,8 +8,8 @@ import imm from 'immutable';
 import { expect } from 'chai';
 
 let testState = imm.fromJS({
-  playerId: 1,
-  opponentId: 2,
+  playerId: '1',
+  opponentId: '2',
   activeId: 1,
   superRegions:{
     1: 2,

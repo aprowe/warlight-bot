@@ -17,8 +17,8 @@ import WarlightState, {
 } from '../src/state';
 
 let testState = new WarlightState(imm.fromJS({
-  playerId: 1,
-  opponentId: 2,
+  playerId: '1',
+  opponentId: '2',
   activeId: 1,
   superRegions:{
     1: 2,
@@ -146,7 +146,7 @@ describe('Pathfinding', () => {
       },
     }));
     let bottles = testState2.calcBottleNecks();
-    
+
     expect(bottles[3] > bottles[2]).to.be.true;
     expect(bottles[3] > bottles[1]).to.be.true;
     expect(bottles[3] > bottles[0]).to.be.true;

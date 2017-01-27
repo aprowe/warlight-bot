@@ -85,7 +85,7 @@ export function calcDistanceFrom (state, targetId, regionId) {
  * Region Heuristics
  */
 export function getRegionType (state, regionId) {
-  let distFromEnemy = calcDistanceFrom(state, state.opponentId(), regionId);
+  let distFromEnemy = calcDistanceFrom(state, state.opponentId, regionId);
   if (distFromEnemy <= 1) {
     return REGION_TYPE.WARZONE;
   }
